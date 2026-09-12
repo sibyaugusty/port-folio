@@ -2,6 +2,34 @@
 
 $(function () {
 
+	// ── Preloader ──
+	$(window).on('load', function() {
+		setTimeout(function() {
+			$('#preloader').addClass('preloader--hidden');
+		}, 500); // small delay for smoother experience
+	});
+
+	// ── Lenis Smooth Scroll (Water flowing effect) ──
+	var lenis = new Lenis({
+		duration: 1.5, // Increased for a flowing water feel
+		easing: function(t) { return Math.min(1, 1.001 - Math.pow(2, -10 * t)); },
+		direction: 'vertical',
+		gestureDirection: 'vertical',
+		smooth: true,
+		mouseMultiplier: 1,
+		smoothTouch: false,
+		touchMultiplier: 2,
+		infinite: false,
+	});
+
+	lenis.on('scroll', ScrollTrigger.update);
+
+	gsap.ticker.add(function(time) {
+		lenis.raf(time * 1000);
+	});
+
+	gsap.ticker.lagSmoothing(0);
+
 	// ── configuration ──
 	var SCROLL_THRESHOLD = 100;
 	var COUNTER_DURATION = 2000;
