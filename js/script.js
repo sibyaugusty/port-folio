@@ -2,12 +2,48 @@
 
 $(function () {
 
-	// ── Preloader ──
-	$(window).on('load', function() {
-		setTimeout(function() {
-			$('#preloader').addClass('preloader--hidden');
-		}, 500); // small delay for smoother experience
+	// ── Preloader & Initial Load Animation ──
+	// Split text into individual characters for staggered animation
+	$('.split-text').each(function() {
+		var isGradient = $(this).hasClass('gradient-text');
+		var text = $(this).text();
+		var split = '';
+		for(var i = 0; i < text.length; i++) {
+			var char = text[i] === ' ' ? '&nbsp;' : text[i];
+			var extraClass = isGradient ? ' hero__title-gradient' : '';
+			split += '<span class="hero-char' + extraClass + '" style="display:inline-block;">' + char + '</span>';
+		}
+		// Remove the gradient class from the parent to avoid stacking context bug
+		if (isGradient) $(this).removeClass('hero__title-gradient');
+		$(this).html(split);
 	});
+
+	// Master timeline for initial load sequence (runs on DOM ready instead of waiting for window.load)
+	var loadTl = gsap.timeline();
+	
+	// Animate each letter
+	loadTl.from('.hero-char', {
+		y: 60,
+		opacity: 0,
+		filter: 'blur(8px)',
+		duration: 0.9,
+		stagger: 0.05,
+		ease: 'back.out(1.2)',
+		clearProps: 'y,opacity,filter'
+	})
+	// Animate other hero elements
+	.from('.hero__subtitle', {
+		y: 30, opacity: 0, duration: 0.8, ease: 'power3.out',
+		clearProps: 'all'
+	}, '-=0.6')
+	.from('.hero__actions', {
+		y: 30, opacity: 0, duration: 0.8, ease: 'power3.out',
+		clearProps: 'all'
+	}, '-=0.7')
+	.from('.hero__clock-container', {
+		y: 30, opacity: 0, duration: 0.8, ease: 'power3.out',
+		clearProps: 'all'
+	}, '-=0.7');
 
 	// ── Lenis Smooth Scroll (Water flowing effect) ──
 	var lenis = new Lenis({
@@ -72,9 +108,9 @@ $(function () {
 				slideSmallY: 25,
 				cardSlideY: 50,    // for card entrances
 				scaleFrom: 0.92,   // subtler scale
-				duration: 0.7,     // slightly faster for snappy feel
+				duration: 1.0,     // Slower for smoother reveal (was 0.7)
 				stagger: 0.08,
-				triggerOffset: 80  // px from bottom of viewport
+				triggerOffset: 140 // Wait until it clears the bottom navbar (was 80)
 			};
 		} else if (vw < 768) {
 			// Larger phones
@@ -85,9 +121,9 @@ $(function () {
 				slideSmallY: 30,
 				cardSlideY: 60,
 				scaleFrom: 0.93,
-				duration: 0.8,
+				duration: 1.1,     // Slower (was 0.8)
 				stagger: 0.1,
-				triggerOffset: 90
+				triggerOffset: 150 // Wait until it clears the bottom navbar (was 90)
 			};
 		} else if (vw < 1024) {
 			// Tablets
@@ -98,9 +134,9 @@ $(function () {
 				slideSmallY: 35,
 				cardSlideY: 80,
 				scaleFrom: 0.92,
-				duration: 0.9,
+				duration: 1.2,     // Slower (was 0.9)
 				stagger: 0.1,
-				triggerOffset: 100
+				triggerOffset: 150 // Reveal slightly later (was 100)
 			};
 		} else {
 			// Desktop
@@ -146,36 +182,27 @@ $(function () {
 				trigger: '.hero',
 				start: 'top top',
 				end: 'bottom top',
-				scrub: 1.2,
-				toggleActions: 'play none none reverse'
+				scrub: 1.2
 			}
 		});
 
 		heroTl
-			.to('.hero__title', {
-				y: isMobile ? -60 : -120,
-				opacity: 0,
-				scale: isMobile ? 0.9 : 0.85,
-				filter: 'blur(10px)',
-				ease: 'none'
-			}, 0)
-			.to('.hero__subtitle', {
-				y: isMobile ? -40 : -80,
-				opacity: 0,
-				ease: 'none'
-			}, 0)
-			.to('.hero__actions', {
-				y: isMobile ? -30 : -60,
-				opacity: 0,
-				ease: 'none'
-			}, 0.05)
-			.to('.hero__clock-container', {
-				y: isMobile ? -50 : -100,
-				opacity: 0,
-				x: isMobile ? 25 : 50,
-				rotation: isMobile ? 3 : 5,
-				ease: 'none'
-			}, 0);
+			.fromTo('.hero__title', 
+				{ y: 0, opacity: 1, scale: 1, filter: 'blur(0px)' },
+				{ y: isMobile ? -60 : -120, opacity: 0, scale: isMobile ? 0.9 : 0.85, filter: 'blur(10px)', ease: 'none', immediateRender: false }
+			, 0)
+			.fromTo('.hero__subtitle',
+				{ y: 0, opacity: 1 },
+				{ y: isMobile ? -40 : -80, opacity: 0, ease: 'none', immediateRender: false }
+			, 0)
+			.fromTo('.hero__actions',
+				{ y: 0, opacity: 1 },
+				{ y: isMobile ? -30 : -60, opacity: 0, ease: 'none', immediateRender: false }
+			, 0.05)
+			.fromTo('.hero__clock-container',
+				{ y: 0, opacity: 1, x: 0, rotation: 0 },
+				{ y: isMobile ? -50 : -100, opacity: 0, x: isMobile ? 25 : 50, rotation: isMobile ? 3 : 5, ease: 'none', immediateRender: false }
+			, 0);
 
 		// Background orbs parallax — reduce on mobile
 		if (!isMobile) {
@@ -656,6 +683,16 @@ $(function () {
 			$scrollToTop.removeClass('scroll-to-top--visible');
 		}
 	}
+
+	// ── Scroll-to-top click handler ──
+	$scrollToTop.on('click', function() {
+		// Use Lenis for smooth scroll if available, fallback to GSAP
+		if (typeof lenis !== 'undefined') {
+			lenis.scrollTo(0, { duration: 1.5 });
+		} else {
+			gsap.to(window, { scrollTo: { y: 0 }, duration: 1.5, ease: 'power3.inOut' });
+		}
+	});
 
 	// highlighting mobile nav based on scroll
 	function updateMobileNav() {

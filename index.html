@@ -15,10 +15,7 @@
 
 <body>
 
-	<!-- preloader -->
-	<div class="preloader" id="preloader">
-		<div class="preloader__spinner"></div>
-	</div>
+
 
 	<!-- background orbs -->
 	<div class="bg-orb bg-orb--primary" data-speed="0.3"></div>
@@ -89,24 +86,24 @@
 		<section class="hero" id="home">
 			<div class="hero__inner">
 				<div class="hero__title-wrapper">
-					<h1 class="hero__title animate-reveal glitch-hover">
-						SIBY<br />
-						<span class="hero__title-gradient">AUGUSTY</span>
+					<h1 class="hero__title title-hover-effect">
+						<span class="split-text">SIBY</span><br />
+						<span class="hero__title-gradient split-text gradient-text">AUGUSTY</span>
 					</h1>
 				</div>
 
-				<p class="hero__subtitle animate-reveal animate-reveal--delay-1">
-					Full Stack <span class="hero__subtitle-accent">PHP</span> Web Developer
+				<p class="hero__subtitle">
+					Full Stack <span class="hero__subtitle-accent">PHP</span> Engineer & AI Integrator
 				</p>
 
-				<div class="hero__actions animate-reveal animate-reveal--delay-2">
+				<div class="hero__actions">
 					<a href="#contact" class="btn btn--primary">Hire Me</a>
 					<a href="#work" class="btn btn--glass glass-panel">Explore Work</a>
 				</div>
 			</div>
 
 			<!-- digital clock -->
-			<div class="hero__clock-container animate-reveal animate-reveal--delay-3">
+			<div class="hero__clock-container">
 				<div class="hero__clock-panel glass-panel">
 					<div class="hero__clock-status">
 						<span class="hero__clock-dot"></span>
@@ -134,15 +131,10 @@
 						The <span class="text-tertiary">Architect</span> Behind the Code
 					</h2>
 					<div>
-						<p class="about__text">I am a dedicated Full Stack PHP Developer with a passion for building
-							clean,
-							efficient, and scalable web solutions. My approach combines technical precision with
-							artistic flair.</p>
-						<p class="about__text">With expertise spanning from complex backend logic to fluid frontend
-							experiences, I
-							specialize in the Laravel and WordPress ecosystems, turning intricate requirements into
-							seamless digital
-							products.</p>
+						<p class="about__text">I am a dedicated Full Stack PHP Engineer and AI Integrator with a passion for building
+							clean, efficient, and scalable web solutions. My approach combines rigorous system design with AI-augmented productivity.</p>
+						<p class="about__text">With expertise spanning from complex Laravel backends to fluid frontend
+							experiences, I specialize in automating complex workflows via n8n and integrating LLM APIs (Claude, Grok) to accelerate development and enhance system capabilities.</p>
 					</div>
 
 					<div class="about__stats">
@@ -242,6 +234,30 @@
 						</div>
 					</div>
 
+					<!-- ai & automation -->
+					<div class="bento-card bento-card--ai glass-panel glass-sheen scroll-reveal">
+						<span class="bento-card__bg-icon material-symbols-outlined">smart_toy</span>
+						<h3 class="bento-card__title bento-card__title--primary font-headline" style="color: var(--tertiary);">AI & Automation</h3>
+						<div class="tech-chips">
+							<div class="tech-chip">
+								<span class="material-symbols-outlined text-tertiary">psychology</span>
+								<span>LLM Integration</span>
+							</div>
+							<div class="tech-chip">
+								<span class="material-symbols-outlined text-tertiary">memory</span>
+								<span>Claude / Grok APIs</span>
+							</div>
+							<div class="tech-chip">
+								<span class="material-symbols-outlined text-tertiary">account_tree</span>
+								<span>n8n Workflows</span>
+							</div>
+							<div class="tech-chip">
+								<span class="material-symbols-outlined text-tertiary">code_blocks</span>
+								<span>Agentic AI (Antigravity)</span>
+							</div>
+						</div>
+					</div>
+
 					<!-- databases -->
 					<div class="bento-card bento-card--db glass-panel glass-sheen scroll-reveal">
 						<div>
@@ -329,6 +345,14 @@
 				</div>
 
 				<div class="services__grid">
+					<div class="service-card glass-panel scroll-reveal">
+						<div class="service-card__icon-wrap service-card__icon-wrap--primary" style="background: rgba(125, 233, 255, 0.1); color: var(--tertiary);">
+							<span class="material-symbols-outlined">smart_toy</span>
+						</div>
+						<h4 class="service-card__title font-headline">AI Integration & Automation</h4>
+						<p class="service-card__desc">Integrating LLM APIs (Claude, Grok) and designing n8n agentic workflows to accelerate development and automate business logic.</p>
+					</div>
+
 					<div class="service-card glass-panel scroll-reveal">
 						<div class="service-card__icon-wrap service-card__icon-wrap--primary">
 							<span class="material-symbols-outlined">laptop_mac</span>
@@ -431,9 +455,9 @@
 <span class="type">class</span> <span class="cls">SibyAugusty</span> {
     <span class="type">public function</span> <span class="fn">getExpertise</span>() {
         <span class="type">return</span> [
-            <span class="str">'PHP'</span> =&gt; <span class="val">'Master'</span>,
-            <span class="str">'Laravel'</span> =&gt; <span class="val">'Pro'</span>,
-            <span class="str">'UI_UX'</span> =&gt; <span class="val">'Futuristic'</span>
+            <span class="str">'PHP & Laravel'</span> =&gt; <span class="val">'Master'</span>,
+            <span class="str">'AI_Integration'</span> =&gt; <span class="val">'Pro'</span>,
+            <span class="str">'Workflow_Auto'</span> =&gt; <span class="val">'n8n'</span>
         ];
     }
 

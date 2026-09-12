@@ -1526,23 +1526,18 @@ button, input, textarea {
 .floating--delay-1   { animation-delay: 1s; }
 .floating--delay-2   { animation-delay: 2s; }
 
-/* Glitch hover for hero */
-.glitch-hover:hover {
-  text-shadow:
-    0.05em 0 0 rgba(255, 0, 0, 0.75),
-    -0.025em -0.05em 0 rgba(0, 255, 0, 0.75),
-    0.025em 0.05em 0 rgba(0, 0, 255, 0.75);
-  animation: glitch 500ms infinite;
+/* Modern smooth hover for hero title and all page titles */
+.title-hover-effect,
+.font-headline {
+  transition: text-shadow 0.4s ease, letter-spacing 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-@keyframes glitch {
-  0%   { text-shadow: 0.05em 0 0 rgba(255,0,0,.75), -0.05em -.025em 0 rgba(0,255,0,.75), -.025em .05em 0 rgba(0,0,255,.75); }
-  14%  { text-shadow: 0.05em 0 0 rgba(255,0,0,.75), -0.05em -.025em 0 rgba(0,255,0,.75), -.025em .05em 0 rgba(0,0,255,.75); }
-  15%  { text-shadow: -.05em -.025em 0 rgba(255,0,0,.75), .025em .025em 0 rgba(0,255,0,.75), -.05em -.05em 0 rgba(0,0,255,.75); }
-  49%  { text-shadow: -.05em -.025em 0 rgba(255,0,0,.75), .025em .025em 0 rgba(0,255,0,.75), -.05em -.05em 0 rgba(0,0,255,.75); }
-  50%  { text-shadow: .025em .05em 0 rgba(255,0,0,.75), .05em 0 0 rgba(0,255,0,.75), 0 -.05em 0 rgba(0,0,255,.75); }
-  99%  { text-shadow: .025em .05em 0 rgba(255,0,0,.75), .05em 0 0 rgba(0,255,0,.75), 0 -.05em 0 rgba(0,0,255,.75); }
-  100% { text-shadow: -.025em 0 0 rgba(255,0,0,.75), -.025em -.025em 0 rgba(0,255,0,.75), -.025em -.05em 0 rgba(0,0,255,.75); }
+.title-hover-effect:hover,
+.font-headline:hover {
+  letter-spacing: 0.015em;
+  text-shadow: 
+    0 5px 20px rgba(97, 194, 255, 0.4),
+    0 0 40px rgba(97, 194, 255, 0.2);
 }
 
 /* responsive — tablet+ (768px) */
@@ -1564,11 +1559,15 @@ button, input, textarea {
   }
 
   .bento-grid {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .bento-card--wide {
-    grid-column: span 2;
+    grid-column: span 1;
+  }
+
+  .bento-card--ai {
+    grid-column: span 1;
   }
 
   .bento-card--db {
@@ -1576,7 +1575,30 @@ button, input, textarea {
   }
 
   .bento-card--vc {
+    grid-column: span 2;
+  }
+}
+
+/* responsive — desktop (1024px) */
+@media (min-width: 1024px) {
+  .bento-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+
+  .bento-card--wide {
     grid-column: span 3;
+  }
+
+  .bento-card--ai {
+    grid-column: span 2;
+  }
+
+  .bento-card--db {
+    grid-column: span 2;
+  }
+
+  .bento-card--vc {
+    grid-column: span 2;
   }
 
   .services {
@@ -1815,35 +1837,6 @@ button, input, textarea {
   }
 }
 
-/* Preloader */
-.preloader {
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  background: var(--background);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: opacity 0.8s ease, visibility 0.8s ease;
-}
-
-.preloader--hidden {
-  opacity: 0;
-  visibility: hidden;
-}
-
-.preloader__spinner {
-  width: 50px;
-  height: 50px;
-  border: 3px solid rgba(97, 194, 255, 0.1);
-  border-top-color: var(--primary);
-  border-radius: 50%;
-  animation: preloader-spin 1s cubic-bezier(0.55, 0.15, 0.45, 0.85) infinite;
-}
-
-@keyframes preloader-spin {
-  to { transform: rotate(360deg); }
-}
 
 /* Lenis recommended styles */
 html.lenis, html.lenis body {
