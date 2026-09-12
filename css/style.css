@@ -108,6 +108,8 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  overscroll-behavior-y: none;
 }
 
 ::selection {
@@ -1434,31 +1436,33 @@ button, input, textarea {
   transform: none;
 }
 
-/* GPU acceleration for animated elements */
-.hero__title,
-.hero__subtitle,
-.hero__actions,
-.hero__clock-container,
-.about__image-wrapper,
-.about__image-glow,
-.bento-card,
-.service-card,
-.service-card__icon-wrap,
-.project-card,
-.terminal__frame,
-.terminal__dot,
-.terminal__code,
-.contact__glow,
-.contact-form,
-.contact__info-item,
-.contact__info-icon,
-.contact__social-link,
-.form-group,
-.project-tag,
-.bg-orb {
-  will-change: transform, opacity;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
+/* GPU acceleration for animated elements — desktop only */
+@media (min-width: 768px) {
+  .hero__title,
+  .hero__subtitle,
+  .hero__actions,
+  .hero__clock-container,
+  .about__image-wrapper,
+  .about__image-glow,
+  .bento-card,
+  .service-card,
+  .service-card__icon-wrap,
+  .project-card,
+  .terminal__frame,
+  .terminal__dot,
+  .terminal__code,
+  .contact__glow,
+  .contact-form,
+  .contact__info-item,
+  .contact__info-icon,
+  .contact__social-link,
+  .form-group,
+  .project-tag,
+  .bg-orb {
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
 }
 
 /* 3D perspective for bento cards */
@@ -1750,13 +1754,40 @@ button, input, textarea {
 
   .app-wrapper {
     perspective: none;
+    overflow-x: hidden;
   }
 
   /* Reduce will-change on mobile for memory savings */
+  .hero__title,
+  .hero__subtitle,
+  .hero__actions,
+  .about__image-wrapper,
+  .about__image-glow,
   .bento-card,
   .service-card,
-  .project-card {
+  .service-card__icon-wrap,
+  .project-card,
+  .terminal__frame,
+  .terminal__dot,
+  .terminal__code,
+  .contact__glow,
+  .contact-form,
+  .contact__info-item,
+  .form-group,
+  .project-tag,
+  .bg-orb {
     will-change: auto;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+
+  /* Disable 3D on mobile */
+  .service-card {
+    transform-style: flat;
+  }
+
+  .project-card__image-wrap {
+    transform-style: flat;
   }
 
   /* Simpler section glow borders on mobile */
@@ -1766,5 +1797,20 @@ button, input, textarea {
   .contact::before {
     left: 5%;
     right: 5%;
+  }
+}
+
+/* Tablet animation optimizations */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .bento-grid {
+    perspective: none;
+  }
+
+  .app-wrapper {
+    perspective: none;
+  }
+
+  .service-card {
+    transform-style: flat;
   }
 }

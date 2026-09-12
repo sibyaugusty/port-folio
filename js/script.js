@@ -24,6 +24,87 @@ $(function () {
 	var elasticEase = 'elastic.out(1, 0.5)';
 	var backEase = 'back.out(1.7)';
 
+	// ── Mobile / Tablet detection ──
+	// Samsung S21 Ultra CSS viewport: 360x800 (portrait)
+	// iPad: 768x1024, iPad Pro: 1024x1366
+	var isMobile = window.innerWidth < 768;
+	var isTablet = window.innerWidth >= 768 && window.innerWidth < 1024;
+	var isSmallScreen = window.innerWidth < 1024;
+
+	// ── Responsive animation values ──
+	// On mobile, reduce distances to avoid overflow and ensure smooth rendering
+	function getAnimValues() {
+		var vw = window.innerWidth;
+		if (vw < 480) {
+			// Small phones (Samsung S21 Ultra = 360px, iPhone SE = 375px)
+			return {
+				slideX: 50,        // reduced from 100-120
+				slideY: 40,        // reduced from 60-120
+				slideSmallX: 30,   // for subtle slides
+				slideSmallY: 25,
+				cardSlideY: 50,    // for card entrances
+				scaleFrom: 0.92,   // subtler scale
+				duration: 0.7,     // slightly faster for snappy feel
+				stagger: 0.08,
+				triggerOffset: 80  // px from bottom of viewport
+			};
+		} else if (vw < 768) {
+			// Larger phones
+			return {
+				slideX: 60,
+				slideY: 50,
+				slideSmallX: 35,
+				slideSmallY: 30,
+				cardSlideY: 60,
+				scaleFrom: 0.93,
+				duration: 0.8,
+				stagger: 0.1,
+				triggerOffset: 90
+			};
+		} else if (vw < 1024) {
+			// Tablets
+			return {
+				slideX: 80,
+				slideY: 60,
+				slideSmallX: 40,
+				slideSmallY: 35,
+				cardSlideY: 80,
+				scaleFrom: 0.92,
+				duration: 0.9,
+				stagger: 0.1,
+				triggerOffset: 100
+			};
+		} else {
+			// Desktop
+			return {
+				slideX: 100,
+				slideY: 80,
+				slideSmallX: 50,
+				slideSmallY: 40,
+				cardSlideY: 100,
+				scaleFrom: 0.9,
+				duration: 1,
+				stagger: 0.12,
+				triggerOffset: 100
+			};
+		}
+	}
+
+	var anim = getAnimValues();
+
+	// ── Helper: Create ScrollTrigger config with pixel offset ──
+	// Uses "top bottom-={offset}px" so the animation starts when the TOP of the 
+	// element is {offset}px above the BOTTOM of the viewport.
+	// This means: element enters viewport, scrolls up another {offset}px, THEN animates.
+	function makeTrigger(el, extraOffset) {
+		var offset = anim.triggerOffset + (extraOffset || 0);
+		return {
+			trigger: el,
+			start: 'top bottom-=' + offset + 'px',
+			toggleActions: 'play none none none'  // play once, don't reverse (avoids jank on scroll up)
+		};
+	}
+
 	// ── disable native scroll-behavior for GSAP control ──
 	// (GSAP handles smooth scrolling via ScrollTrigger)
 
@@ -44,52 +125,54 @@ $(function () {
 
 		heroTl
 			.to('.hero__title', {
-				y: -120,
+				y: isMobile ? -60 : -120,
 				opacity: 0,
-				scale: 0.85,
+				scale: isMobile ? 0.9 : 0.85,
 				filter: 'blur(10px)',
 				ease: 'none'
 			}, 0)
 			.to('.hero__subtitle', {
-				y: -80,
+				y: isMobile ? -40 : -80,
 				opacity: 0,
 				ease: 'none'
 			}, 0)
 			.to('.hero__actions', {
-				y: -60,
+				y: isMobile ? -30 : -60,
 				opacity: 0,
 				ease: 'none'
 			}, 0.05)
 			.to('.hero__clock-container', {
-				y: -100,
+				y: isMobile ? -50 : -100,
 				opacity: 0,
-				x: 50,
-				rotation: 5,
+				x: isMobile ? 25 : 50,
+				rotation: isMobile ? 3 : 5,
 				ease: 'none'
 			}, 0);
 
-		// Background orbs parallax
-		gsap.to('.bg-orb--primary', {
-			y: -200,
-			x: 100,
-			scrollTrigger: {
-				trigger: 'body',
-				start: 'top top',
-				end: 'bottom bottom',
-				scrub: 2
-			}
-		});
+		// Background orbs parallax — reduce on mobile
+		if (!isMobile) {
+			gsap.to('.bg-orb--primary', {
+				y: -200,
+				x: 100,
+				scrollTrigger: {
+					trigger: 'body',
+					start: 'top top',
+					end: 'bottom bottom',
+					scrub: 2
+				}
+			});
 
-		gsap.to('.bg-orb--secondary', {
-			y: 200,
-			x: -100,
-			scrollTrigger: {
-				trigger: 'body',
-				start: 'top top',
-				end: 'bottom bottom',
-				scrub: 3
-			}
-		});
+			gsap.to('.bg-orb--secondary', {
+				y: 200,
+				x: -100,
+				scrollTrigger: {
+					trigger: 'body',
+					start: 'top top',
+					end: 'bottom bottom',
+					scrub: 3
+				}
+			});
+		}
 	}
 
 	// ══════════════════════════════════════════════════════════
@@ -97,19 +180,16 @@ $(function () {
 	// ══════════════════════════════════════════════════════════
 
 	function initAboutAnimations() {
-		// Image wrapper — slides from left with rotation
+		// Image wrapper — slides from left
 		gsap.from('.about__image-wrapper', {
-			x: -100,
+			x: -anim.slideX,
+			y: anim.slideSmallY,
 			opacity: 0,
-			rotation: -5,
-			scale: 0.9,
-			duration: 1.2,
+			rotation: isSmallScreen ? -2 : -5,
+			scale: anim.scaleFrom,
+			duration: anim.duration * 1.2,
 			ease: backEase,
-			scrollTrigger: {
-				trigger: '.about__image-wrapper',
-				start: 'top 85%',
-				toggleActions: 'play none none reverse'
-			}
+			scrollTrigger: makeTrigger('.about__image-wrapper')
 		});
 
 		// Image glow pulse animation
@@ -119,50 +199,60 @@ $(function () {
 		}, {
 			scale: 1,
 			opacity: 0.5,
-			duration: 1.5,
+			duration: anim.duration * 1.5,
 			ease: smoothEase,
-			scrollTrigger: {
-				trigger: '.about__image-wrapper',
-				start: 'top 85%',
-				toggleActions: 'play none none reverse'
-			}
+			scrollTrigger: makeTrigger('.about__image-wrapper')
 		});
 
-		// About text content — slides from right independently
+		// About text content — slides from right, each element triggers independently
 		var aboutContent = document.querySelector('.about__grid');
 		if (aboutContent) {
-			var textElements = aboutContent.querySelectorAll('.about__heading, .about__text, .about__stats');
-			
-			textElements.forEach(function(el) {
-				gsap.from(el, {
-					y: 50, // Added vertical bounding from bottom as requested
-					x: 30, // Still slides slightly from right
+			var aboutHeading = aboutContent.querySelector('.about__heading');
+			if (aboutHeading) {
+				gsap.from(aboutHeading, {
+					x: anim.slideSmallX,
+					y: anim.slideSmallY,
 					opacity: 0,
-					duration: 1,
+					duration: anim.duration,
 					ease: smoothEase,
-					scrollTrigger: {
-						trigger: el,
-						start: 'top 85%',
-						toggleActions: 'play none none reverse'
-					}
+					scrollTrigger: makeTrigger(aboutHeading)
+				});
+			}
+
+			var aboutTexts = aboutContent.querySelectorAll('.about__text');
+			aboutTexts.forEach(function(el) {
+				gsap.from(el, {
+					x: anim.slideSmallX,
+					y: anim.slideSmallY,
+					opacity: 0,
+					duration: anim.duration,
+					ease: smoothEase,
+					scrollTrigger: makeTrigger(el)
 				});
 			});
+
+			var aboutStats = aboutContent.querySelector('.about__stats');
+			if (aboutStats) {
+				gsap.from(aboutStats, {
+					y: anim.slideSmallY,
+					opacity: 0,
+					duration: anim.duration,
+					ease: smoothEase,
+					scrollTrigger: makeTrigger(aboutStats)
+				});
+			}
 		}
 
 		// Stats — independent count up with scale bounce
 		var stats = document.querySelectorAll('.about__stat');
 		stats.forEach(function(stat) {
 			gsap.from(stat, {
-				scale: 0,
+				scale: 0.3,
 				opacity: 0,
-				y: 30,
-				duration: 0.8,
+				y: anim.slideSmallY,
+				duration: anim.duration * 0.8,
 				ease: elasticEase,
-				scrollTrigger: {
-					trigger: stat,
-					start: 'top 85%',
-					toggleActions: 'play none none reverse'
-				}
+				scrollTrigger: makeTrigger(stat)
 			});
 		});
 	}
@@ -172,33 +262,28 @@ $(function () {
 	// ══════════════════════════════════════════════════════════
 
 	function initTechStackAnimations() {
-		// Section header — text reveal
+		// Section header — slides from bottom
 		gsap.from('.tech-stack__header', {
-			y: 60,
+			y: anim.slideSmallY,
 			opacity: 0,
-			duration: 1,
+			duration: anim.duration,
 			ease: smoothEase,
-			scrollTrigger: {
-				trigger: '.tech-stack__header',
-				start: 'top 85%',
-				toggleActions: 'play none none reverse'
-			}
+			scrollTrigger: makeTrigger('.tech-stack__header')
 		});
 
-		// Bento cards — independent 2D entrance for smooth, snappy mobile scrolling
+		// Bento cards — each triggers independently when it enters the viewport
+		// Alternate directions: even from left, odd from right
 		var bentoCards = document.querySelectorAll('.bento-card');
-		bentoCards.forEach(function(card) {
+		bentoCards.forEach(function(card, i) {
+			var direction = i % 2 === 0 ? -1 : 1;
 			gsap.from(card, {
-				y: 100,
+				x: anim.slideSmallX * direction,
+				y: anim.cardSlideY,
 				opacity: 0,
-				scale: 0.95,
-				duration: 0.8,
+				scale: anim.scaleFrom,
+				duration: anim.duration,
 				ease: 'back.out(1.2)',
-				scrollTrigger: {
-					trigger: card,
-					start: 'top 90%',
-					toggleActions: 'play none none reverse'
-				}
+				scrollTrigger: makeTrigger(card)
 			});
 		});
 
@@ -211,61 +296,54 @@ $(function () {
 	// ══════════════════════════════════════════════════════════
 
 	function initServicesAnimations() {
-		// Section header
+		// Section header — slides from bottom
 		gsap.from('.services__header', {
-			y: 50,
+			y: anim.slideSmallY,
 			opacity: 0,
-			duration: 1,
+			duration: anim.duration,
 			ease: smoothEase,
-			scrollTrigger: {
-				trigger: '.services__header',
-				start: 'top 85%',
-				toggleActions: 'play none none reverse'
-			}
+			scrollTrigger: makeTrigger('.services__header')
 		});
 
 		// Divider line grows from left
 		gsap.from('.services__divider', {
 			scaleX: 0,
 			transformOrigin: 'left center',
-			duration: 1.2,
+			duration: anim.duration * 1.2,
 			ease: smoothEase,
-			scrollTrigger: {
-				trigger: '.services__header',
-				start: 'top 75%',
-				toggleActions: 'play none none reverse'
-			}
+			scrollTrigger: makeTrigger('.services__header', 20)
 		});
 
-		// Service cards — independent slide up straight from bottom
+		// Service cards — each triggers independently
+		// Alternate: first from left, second from bottom, third from right
 		var serviceCards = document.querySelectorAll('.service-card');
+		var directions = [-1, 0, 1]; // left, bottom, right
 		serviceCards.forEach(function (card, i) {
-			gsap.from(card, {
-				y: 120,
+			var dir = directions[i % 3];
+			var fromProps = {
+				y: anim.cardSlideY,
 				opacity: 0,
-				scale: 0.95,
-				duration: 0.8,
+				scale: anim.scaleFrom,
+				duration: anim.duration,
 				ease: 'back.out(1.2)',
-				scrollTrigger: {
-					trigger: card,
-					start: 'top 90%',
-					toggleActions: 'play none none reverse'
-				}
-			});
+				scrollTrigger: makeTrigger(card)
+			};
 
-			// Service card icon — bounce in
+			if (dir !== 0) {
+				fromProps.x = anim.slideSmallX * dir;
+			}
+
+			gsap.from(card, fromProps);
+
+			// Service card icon — bounce in (triggers with the card)
 			var icon = card.querySelector('.service-card__icon-wrap');
 			if (icon) {
 				gsap.from(icon, {
 					scale: 0,
-					rotation: -180,
-					duration: 0.8,
+					rotation: isSmallScreen ? -90 : -180,
+					duration: anim.duration * 0.8,
 					ease: elasticEase,
-					scrollTrigger: {
-						trigger: card,
-						start: 'top 90%',
-						toggleActions: 'play none none reverse'
-					}
+					scrollTrigger: makeTrigger(card, 10)
 				});
 			}
 		});
@@ -276,57 +354,49 @@ $(function () {
 	// ══════════════════════════════════════════════════════════
 
 	function initProjectsAnimations() {
-		// Section title
+		// Section title — from bottom
 		gsap.from('.projects__title', {
-			y: 40,
+			y: anim.slideSmallY,
 			opacity: 0,
-			letterSpacing: '0.3em',
-			duration: 1,
+			duration: anim.duration,
 			ease: smoothEase,
-			scrollTrigger: {
-				trigger: '.projects__title',
-				start: 'top 85%',
-				toggleActions: 'play none none reverse'
-			}
+			scrollTrigger: makeTrigger('.projects__title')
 		});
 
-		// Project cards — alternating slide directions
+		// Project cards — alternating slide directions (left/right)
 		var projectCards = document.querySelectorAll('.project-card');
 		projectCards.forEach(function (card, i) {
 			var direction = i % 2 === 0 ? -1 : 1;
 
 			gsap.from(card, {
-				x: 120 * direction,
+				x: anim.slideX * direction,
 				opacity: 0,
-				scale: 0.9,
-				rotation: 3 * direction,
-				duration: 1.2,
+				scale: anim.scaleFrom,
+				rotation: isSmallScreen ? 1.5 * direction : 3 * direction,
+				duration: anim.duration * 1.2,
 				ease: smoothEase,
-				scrollTrigger: {
-					trigger: card,
-					start: 'top 85%',
-					end: 'top 40%',
-					toggleActions: 'play none none reverse'
-				}
+				scrollTrigger: makeTrigger(card)
 			});
 
-			// Image parallax inside cards
-			var img = card.querySelector('.project-card__image');
-			if (img) {
-				gsap.fromTo(img, {
-					scale: 1.2,
-					y: 30
-				}, {
-					scale: 1,
-					y: -30,
-					ease: 'none',
-					scrollTrigger: {
-						trigger: card,
-						start: 'top bottom',
-						end: 'bottom top',
-						scrub: 1.5
-					}
-				});
+			// Image parallax inside cards — only on desktop (skip on mobile for perf)
+			if (!isSmallScreen) {
+				var img = card.querySelector('.project-card__image');
+				if (img) {
+					gsap.fromTo(img, {
+						scale: 1.2,
+						y: 30
+					}, {
+						scale: 1,
+						y: -30,
+						ease: 'none',
+						scrollTrigger: {
+							trigger: card,
+							start: 'top bottom',
+							end: 'bottom top',
+							scrub: 1.5
+						}
+					});
+				}
 			}
 
 			// Project tags — pop in per card
@@ -336,13 +406,9 @@ $(function () {
 					scale: 0,
 					opacity: 0,
 					duration: 0.5,
-					stagger: 0.1,
+					stagger: anim.stagger,
 					ease: backEase,
-					scrollTrigger: {
-						trigger: card,
-						start: 'top 80%',
-						toggleActions: 'play none none reverse'
-					}
+					scrollTrigger: makeTrigger(card, 20)
 				});
 			}
 		});
@@ -353,20 +419,17 @@ $(function () {
 	// ══════════════════════════════════════════════════════════
 
 	function initTerminalAnimations() {
-		// Terminal frame — scale + rotation entrance
+		// Terminal frame — scale + slide from bottom (no rotationX on mobile)
 		gsap.from('.terminal__frame', {
-			y: 80,
+			y: anim.cardSlideY,
 			opacity: 0,
-			scale: 0.85,
-			rotationX: 10,
+			scale: isSmallScreen ? 0.9 : 0.85,
+			// Skip rotationX on mobile — causes rendering issues
+			rotationX: isSmallScreen ? 0 : 10,
 			transformOrigin: 'center bottom',
-			duration: 1.2,
+			duration: anim.duration * 1.2,
 			ease: backEase,
-			scrollTrigger: {
-				trigger: '.terminal__frame',
-				start: 'top 85%',
-				toggleActions: 'play none none reverse'
-			}
+			scrollTrigger: makeTrigger('.terminal__frame')
 		});
 
 		// Terminal dots — sequential pop
@@ -375,11 +438,7 @@ $(function () {
 			duration: 0.4,
 			stagger: 0.1,
 			ease: elasticEase,
-			scrollTrigger: {
-				trigger: '.terminal__frame',
-				start: 'top 70%',
-				toggleActions: 'play none none reverse'
-			}
+			scrollTrigger: makeTrigger('.terminal__frame', 30)
 		});
 
 		// Terminal code — typewriter-style line reveal
@@ -387,11 +446,7 @@ $(function () {
 			clipPath: 'inset(0 0 100% 0)',
 			duration: 1.5,
 			ease: 'power2.inOut',
-			scrollTrigger: {
-				trigger: '.terminal__frame',
-				start: 'top 65%',
-				toggleActions: 'play none none reverse'
-			}
+			scrollTrigger: makeTrigger('.terminal__frame', 50)
 		});
 	}
 
@@ -406,71 +461,63 @@ $(function () {
 			opacity: 0,
 			duration: 2,
 			ease: smoothEase,
-			scrollTrigger: {
-				trigger: '.contact__heading',
-				start: 'top 85%',
-				toggleActions: 'play none none reverse'
-			}
+			scrollTrigger: makeTrigger('.contact__heading')
 		});
+
+		// Contact heading — text reveal from bottom
+		gsap.from('.contact__heading', {
+			y: anim.slideSmallY,
+			opacity: 0,
+			clipPath: 'inset(100% 0 0 0)',
+			duration: anim.duration,
+			ease: smoothEase,
+			scrollTrigger: makeTrigger('.contact__heading')
+		});
+
+		// Contact intro text
+		var contactIntro = document.querySelector('.contact__intro');
+		if (contactIntro) {
+			gsap.from(contactIntro, {
+				y: anim.slideSmallY,
+				opacity: 0,
+				duration: anim.duration,
+				ease: smoothEase,
+				scrollTrigger: makeTrigger(contactIntro)
+			});
+		}
 
 		// Contact info — slide from left independently
 		var contactInfo = document.querySelector('.contact__grid > .scroll-reveal');
 		if (contactInfo) {
 			gsap.from(contactInfo, {
-				y: 50, // Added vertical bounding
-				x: -40,
+				x: -anim.slideSmallX,
+				y: anim.slideSmallY,
 				opacity: 0,
-				duration: 1,
+				duration: anim.duration,
 				ease: smoothEase,
-				scrollTrigger: {
-					trigger: contactInfo,
-					start: 'top 85%',
-					toggleActions: 'play none none reverse'
-				}
+				scrollTrigger: makeTrigger(contactInfo)
 			});
 		}
 
 		// Contact form — slide from right independently
 		gsap.from('.contact-form', {
-			y: 50, // Added vertical bounding
-			x: 40,
+			x: anim.slideSmallX,
+			y: anim.slideSmallY,
 			opacity: 0,
-			duration: 1,
+			duration: anim.duration,
 			ease: smoothEase,
-			scrollTrigger: {
-				trigger: '.contact-form',
-				start: 'top 85%',
-				toggleActions: 'play none none reverse'
-			}
+			scrollTrigger: makeTrigger('.contact-form')
 		});
 
-		// Contact heading — text reveal
-		gsap.from('.contact__heading', {
-			y: 40,
-			opacity: 0,
-			clipPath: 'inset(100% 0 0 0)',
-			duration: 1,
-			ease: smoothEase,
-			scrollTrigger: {
-				trigger: '.contact__heading',
-				start: 'top 85%',
-				toggleActions: 'play none none reverse'
-			}
-		});
-
-		// Contact info items — independent
+		// Contact info items — each slides from left independently
 		var infoItems = document.querySelectorAll('.contact__info-item');
 		infoItems.forEach(function(item) {
 			gsap.from(item, {
-				x: -40,
+				x: -anim.slideSmallX,
 				opacity: 0,
-				duration: 0.8,
+				duration: anim.duration * 0.8,
 				ease: smoothEase,
-				scrollTrigger: {
-					trigger: item,
-					start: 'top 85%',
-					toggleActions: 'play none none reverse'
-				}
+				scrollTrigger: makeTrigger(item)
 			});
 		});
 
@@ -480,18 +527,16 @@ $(function () {
 		// Social links animate naturally with the parent contact slide
 		// (Separate scale:0 animation was keeping them invisible)
 
-		// Form groups — cascade slide up
-		gsap.from('.form-group', {
-			y: 40,
-			opacity: 0,
-			duration: 0.8,
-			stagger: 0.12,
-			ease: smoothEase,
-			scrollTrigger: {
-				trigger: '.contact-form',
-				start: 'top 80%',
-				toggleActions: 'play none none reverse'
-			}
+		// Form groups — cascade slide up, each triggers independently
+		var formGroups = document.querySelectorAll('.form-group');
+		formGroups.forEach(function(group) {
+			gsap.from(group, {
+				y: anim.slideSmallY,
+				opacity: 0,
+				duration: anim.duration * 0.8,
+				ease: smoothEase,
+				scrollTrigger: makeTrigger(group)
+			});
 		});
 
 		// Submit button — scale entrance
@@ -499,13 +544,9 @@ $(function () {
 			scale: 0.8,
 			opacity: 0,
 			y: 20,
-			duration: 0.8,
+			duration: anim.duration * 0.8,
 			ease: backEase,
-			scrollTrigger: {
-				trigger: '.contact-form',
-				start: 'top 65%',
-				toggleActions: 'play none none reverse'
-			}
+			scrollTrigger: makeTrigger('.btn--cta')
 		});
 	}
 
@@ -538,6 +579,9 @@ $(function () {
 	// ══════════════════════════════════════════════════════════
 
 	function initMagneticElements() {
+		// Only init on non-touch devices (magnetic hover doesn't work on touch)
+		if ('ontouchstart' in window) return;
+
 		$('.side-navbar__link, .contact__social-link').on('mouseenter', function (e) {
 			var el = this;
 			$(el).on('mousemove.magnetic', function (ev) {
@@ -679,7 +723,7 @@ $(function () {
 	function initStatCounters() {
 		ScrollTrigger.create({
 			trigger: '.about__stats',
-			start: 'top 85%',
+			start: 'top bottom-=' + anim.triggerOffset + 'px',
 			onEnter: function () {
 				animateCounter($('#stat-years'), 5, '+');
 				animateCounter($('#stat-projects'), 50, '+');
@@ -754,19 +798,6 @@ $(function () {
 		}
 	});
 
-	// scroll to top action
-	$scrollToTop.on('click', function () {
-		gsap.to(window, {
-			duration: 1,
-			scrollTo: { y: 0, autoKill: false },
-			ease: 'power3.inOut'
-		});
-		// jQuery fallback
-		$('html, body').animate({
-			scrollTop: 0
-		}, 800, 'swing');
-	});
-
 	// ══════════════════════════════════════════════════════════
 	// INITIALIZATION
 	// ══════════════════════════════════════════════════════════
@@ -789,16 +820,25 @@ $(function () {
 		initMagneticElements();
 
 		// Refresh ScrollTrigger after all animations are set
-		ScrollTrigger.refresh();
+		// Use a small delay to ensure DOM is fully laid out (critical on mobile)
+		setTimeout(function() {
+			ScrollTrigger.refresh();
+		}, 100);
 	}
 
 	init();
 
 	// Refresh ScrollTrigger on window resize for responsiveness
+	// Also recalculate animation values on orientation change
 	var resizeTimer;
 	$window.on('resize', function () {
 		clearTimeout(resizeTimer);
 		resizeTimer = setTimeout(function () {
+			// Recalculate device type
+			isMobile = window.innerWidth < 768;
+			isTablet = window.innerWidth >= 768 && window.innerWidth < 1024;
+			isSmallScreen = window.innerWidth < 1024;
+			anim = getAnimValues();
 			ScrollTrigger.refresh();
 		}, 250);
 	});
