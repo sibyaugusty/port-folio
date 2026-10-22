@@ -1,0 +1,24 @@
+name: Auto Deploy to cPanel
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Trigger cPanel Git Pull & Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger cPanel Git Update & Deployment
+        run: |
+          echo "Updating cPanel Git Repository..."
+          UPDATE_RES=$(curl -s -k -H "Authorization: cpanel grepxain:${{ secrets.CPANEL_API_TOKEN }}" \
+            "https://grepxa.in:2083/execute/VersionControl/update?repository_root=/home/grepxain/repositories/port-folio&branch=main")
+          echo "$UPDATE_RES"
+
+          echo "Executing .cpanel.yml Deployment..."
+          DEPLOY_RES=$(curl -s -k -H "Authorization: cpanel grepxain:${{ secrets.CPANEL_API_TOKEN }}" \
+            "https://grepxa.in:2083/execute/VersionControlDeployment/create?repository_root=/home/grepxain/repositories/port-folio")
+          echo "$DEPLOY_RES"
