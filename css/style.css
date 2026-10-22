@@ -1779,6 +1779,81 @@ button, input, textarea {
     overflow-x: hidden;
   }
 
+  /* Hero mobile adjustments — centered, device height, column-wise, tight whitespace */
+  .hero {
+    height: 100dvh;
+    min-height: 100dvh;
+    min-height: 100vh;
+    padding: var(--sp-4) var(--sp-4) calc(5rem + env(safe-area-inset-bottom));
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+  }
+
+  .hero__inner {
+    margin: auto;
+    width: 100%;
+    max-width: 26rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .hero__title {
+    font-size: clamp(3.4rem, 14vw, 5.4rem);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    text-align: center;
+  }
+
+  .hero__title .split-text:first-child {
+    display: inline-block;
+    margin-bottom: clamp(0.35rem, 1.8vh, 1.25rem);
+  }
+
+  .hero__subtitle {
+    font-size: clamp(0.85rem, 3.2vw, 1.1rem);
+    margin-top: clamp(1.25rem, 3.5vh, 2.5rem);
+    letter-spacing: 0.12em;
+    line-height: 1.5;
+    max-width: 20rem;
+    text-align: center;
+  }
+
+  .hero__actions {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    margin-top: clamp(1.75rem, 4.5vh, 3.5rem);
+    gap: clamp(0.75rem, 2vh, 1.35rem);
+    width: 100%;
+    max-width: 17rem;
+  }
+
+  .hero__actions .btn {
+    width: 100%;
+    padding: clamp(0.8rem, 1.8vh, 1.1rem) 1.5rem;
+    font-size: 1rem;
+    justify-content: center;
+    text-align: center;
+    box-sizing: border-box;
+  }
+
+  /* Compact section spacing on mobile */
+  .about,
+  .tech-stack,
+  .services,
+  .projects,
+  .terminal,
+  .contact {
+    padding: var(--sp-12) var(--sp-4);
+  }
+
   /* Reduce will-change on mobile for memory savings */
   .hero__title,
   .hero__subtitle,

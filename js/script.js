@@ -30,20 +30,7 @@ $(function () {
 		stagger: 0.05,
 		ease: 'back.out(1.2)',
 		clearProps: 'y,opacity,filter'
-	})
-	// Animate other hero elements
-	.from('.hero__subtitle', {
-		y: 30, opacity: 0, duration: 0.8, ease: 'power3.out',
-		clearProps: 'all'
-	}, '-=0.6')
-	.from('.hero__actions', {
-		y: 30, opacity: 0, duration: 0.8, ease: 'power3.out',
-		clearProps: 'all'
-	}, '-=0.7')
-	.from('.hero__clock-container', {
-		y: 30, opacity: 0, duration: 0.8, ease: 'power3.out',
-		clearProps: 'all'
-	}, '-=0.7');
+	});
 
 	// ── Lenis Smooth Scroll (Water flowing effect) ──
 	var lenis = new Lenis({
@@ -58,7 +45,11 @@ $(function () {
 		infinite: false,
 	});
 
-	lenis.on('scroll', ScrollTrigger.update);
+	lenis.on('scroll', function() {
+		ScrollTrigger.update();
+		handleNavScroll();
+		updateMobileNav();
+	});
 
 	gsap.ticker.add(function(time) {
 		lenis.raf(time * 1000);
@@ -182,27 +173,40 @@ $(function () {
 				trigger: '.hero',
 				start: 'top top',
 				end: 'bottom top',
-				scrub: 1.2
+				scrub: isMobile ? 0.5 : 1.0,
+				onLeaveBack: function () {
+					gsap.set(['.hero__title', '.hero__subtitle', '.hero__actions', '.hero__clock-container'], {
+						opacity: 1,
+						y: 0,
+						scale: 1,
+						filter: 'blur(0px)',
+						clearProps: 'transform,opacity,filter'
+					});
+				}
 			}
 		});
 
 		heroTl
 			.fromTo('.hero__title', 
 				{ y: 0, opacity: 1, scale: 1, filter: 'blur(0px)' },
-				{ y: isMobile ? -60 : -120, opacity: 0, scale: isMobile ? 0.9 : 0.85, filter: 'blur(10px)', ease: 'none', immediateRender: false }
-			, 0)
+				{ y: isMobile ? -60 : -120, opacity: 0, scale: isMobile ? 0.9 : 0.85, filter: 'blur(10px)', ease: 'none' },
+				0
+			)
 			.fromTo('.hero__subtitle',
 				{ y: 0, opacity: 1 },
-				{ y: isMobile ? -40 : -80, opacity: 0, ease: 'none', immediateRender: false }
-			, 0)
+				{ y: isMobile ? -40 : -80, opacity: 0, ease: 'none' },
+				0
+			)
 			.fromTo('.hero__actions',
 				{ y: 0, opacity: 1 },
-				{ y: isMobile ? -30 : -60, opacity: 0, ease: 'none', immediateRender: false }
-			, 0.05)
+				{ y: isMobile ? -30 : -60, opacity: 0, ease: 'none' },
+				0
+			)
 			.fromTo('.hero__clock-container',
 				{ y: 0, opacity: 1, x: 0, rotation: 0 },
-				{ y: isMobile ? -50 : -100, opacity: 0, x: isMobile ? 25 : 50, rotation: isMobile ? 3 : 5, ease: 'none', immediateRender: false }
-			, 0);
+				{ y: isMobile ? -50 : -100, opacity: 0, x: isMobile ? 25 : 50, rotation: isMobile ? 3 : 5, ease: 'none' },
+				0
+			);
 
 		// Background orbs parallax — reduce on mobile
 		if (!isMobile) {
@@ -677,6 +681,16 @@ $(function () {
 			$sideNavbar.addClass('side-navbar--hidden');
 		}
 
+		if (scrollPos <= 30) {
+			gsap.set(['.hero__title', '.hero__subtitle', '.hero__actions', '.hero__clock-container'], {
+				opacity: 1,
+				y: 0,
+				scale: 1,
+				filter: 'blur(0px)',
+				clearProps: 'transform,opacity,filter'
+			});
+		}
+
 		if (scrollPos > 500) {
 			$scrollToTop.addClass('scroll-to-top--visible');
 		} else {
@@ -684,55 +698,84 @@ $(function () {
 		}
 	}
 
+	function resetHeroElements() {
+		gsap.set(['.hero__title', '.hero__subtitle', '.hero__actions', '.hero__clock-container'], {
+			opacity: 1,
+			y: 0,
+			scale: 1,
+			filter: 'blur(0px)',
+			clearProps: 'transform,opacity,filter'
+		});
+		ScrollTrigger.update();
+		handleNavScroll();
+		updateMobileNav();
+	}
+
 	// ── Scroll-to-top click handler ──
-	$scrollToTop.on('click', function() {
-		// Use Lenis for smooth scroll if available, fallback to GSAP
-		if (typeof lenis !== 'undefined') {
-			lenis.scrollTo(0, { duration: 1.5 });
+	$scrollToTop.on('click', function (e) {
+		e.preventDefault();
+		if (typeof lenis !== 'undefined' && lenis) {
+			lenis.scrollTo(0, {
+				duration: 1.2,
+				onComplete: resetHeroElements
+			});
 		} else {
-			gsap.to(window, { scrollTo: { y: 0 }, duration: 1.5, ease: 'power3.inOut' });
+			gsap.to(window, {
+				scrollTo: { y: 0 },
+				duration: 1.0,
+				ease: 'power3.inOut',
+				onComplete: resetHeroElements
+			});
 		}
 	});
 
 	// highlighting mobile nav based on scroll
 	function updateMobileNav() {
 		var scrollPos = $window.scrollTop() + $window.height() / 3;
-		var sections = ['work', 'tech', 'experience', 'contact'];
+		var sections = ['tech', 'experience', 'work', 'contact'];
+		var activeSection = null;
 
-		$.each(sections, function (_, id) {
-			var $section = $('#' + id);
-			if ($section.length) {
-				var top = $section.offset().top;
-				var bottom = top + $section.outerHeight();
+		var $firstSection = $('#' + sections[0]);
+		var firstTop = $firstSection.length ? $firstSection.offset().top : 999999;
 
-				if (scrollPos >= top && scrollPos < bottom) {
-					$bottomNav.find('.bottom-navbar__item').removeClass('bottom-navbar__item--active');
-					$bottomNav.find('[data-section="' + id + '"]').addClass('bottom-navbar__item--active');
+		if (scrollPos >= firstTop) {
+			$.each(sections, function (_, id) {
+				var $section = $('#' + id);
+				if ($section.length) {
+					var top = $section.offset().top;
+					var bottom = top + $section.outerHeight();
+
+					if (scrollPos >= top && scrollPos < bottom) {
+						activeSection = id;
+					}
 				}
-			}
-		});
+			});
+		}
+
+		$bottomNav.find('.bottom-navbar__item').removeClass('bottom-navbar__item--active');
+		if (activeSection) {
+			$bottomNav.find('[data-section="' + activeSection + '"]').addClass('bottom-navbar__item--active');
+		}
 	}
 
 	// smooth scroll event for anchor links
 	$('a[href^="#"]').on('click', function (e) {
-		var target = $(this.getAttribute('href'));
-		if (target.length) {
-			e.preventDefault();
-			gsap.to(window, {
-				duration: 1,
-				scrollTo: { y: target.offset().top - 40, autoKill: false },
-				ease: 'power3.inOut'
-			});
+		var href = $(this).attr('href');
+		if (href && href.length > 1 && href.startsWith('#')) {
+			var $target = $(href);
+			if ($target.length) {
+				e.preventDefault();
+				if (typeof lenis !== 'undefined' && lenis) {
+					lenis.scrollTo($target[0], { offset: -40, duration: 1.2 });
+				} else {
+					gsap.to(window, {
+						duration: 1,
+						scrollTo: { y: $target.offset().top - 40, autoKill: true },
+						ease: 'power3.inOut'
+					});
+				}
+			}
 		}
-	});
-
-	// scroll to top button click handler
-	$scrollToTop.on('click', function () {
-		gsap.to(window, {
-			duration: 1,
-			scrollTo: { y: 0, autoKill: false },
-			ease: 'power3.inOut'
-		});
 	});
 
 	// updating hero digital clock
